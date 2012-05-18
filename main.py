@@ -2,9 +2,9 @@
 
 import sys
 import pygame
-from pygame.locals import *
 import painter
 import enemy
+from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
 def init_window():
 	pygame.init()
@@ -13,34 +13,43 @@ def init_window():
  
 def input(events):
 	for event in events:
-		if (event.type == QUIT) or (event.type == KEYDOWN and event.key == K_ESCAPE):
+		if (event.type == QUIT) or (event.type == KEYDOWN 
+		                        and event.key == K_ESCAPE):
 			sys.exit(0)
 		else:
 			pass
+			
 def check(creatures, endLocation):
-	for creature in creatures:
+  """checks if at least one of items in creatures touches endLocation 
+    list creatures - list of game objects
+    int endLocation - x coordinate of position where game overs 
+  """
+  for creature in creatures:
 		if creature.cX + creature.width >= endLocation:
 			return 1
-	return 0
+  return 0
  
 def action(speed, endLocation):
-	creatures_list = []
-	screen = pygame.display.get_surface()
-	screenWidth, screenHeight = screen.get_size()
-	zombie = enemy.Enemy(0, screenHeight / 3) 
-	creatures_list.append(zombie)
-	creatures = pygame.sprite.RenderPlain(creatures_list)
-	clock = pygame.time.Clock()
-	while 1:
-		clock.tick(float(speed))
-		input(pygame.event.get())
-		if check(creatures_list, endLocation) == 1:
-			painter.displayGameOver()
-		else:
-			creatures.update() 
-			painter.drawBackground()
-			creatures.draw(screen)		
-			pygame.display.flip()
+  """float speed - amount of ticks in one second 
+     int endLocation - x coordinate of position where game overs 
+  """
+  creatures_list = []
+  screen = pygame.display.get_surface()
+  screenWidth, screenHeight = screen.get_size()
+  zombie = enemy.Enemy(0, screenHeight / 3) 
+  creatures_list.append(zombie)
+  creatures = pygame.sprite.RenderPlain(creatures_list)
+  clock = pygame.time.Clock()
+  while 1:
+    clock.tick(float(speed))
+    input(pygame.event.get())
+    if check(creatures_list, endLocation) == 1:
+      painter.displayGameOver()
+    else:
+      creatures.update() 
+      painter.drawBackground()
+      creatures.draw(screen)		
+      pygame.display.flip()
 		
 
  
