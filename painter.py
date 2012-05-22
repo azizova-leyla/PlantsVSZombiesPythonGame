@@ -7,8 +7,12 @@ import pygame
 
 
 def LoadImageAndScale(name, (w, h)):
-  """ string name - name of image to load 
-      returns image and it's rectangle
+  """ 
+    Args:
+      string name - name of image to load
+      size (w,h) - width and height of resulting image
+    Returns 
+      image, scaled to size
   """
   fullname = os.path.join('data', name)
   try:
