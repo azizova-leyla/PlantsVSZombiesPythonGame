@@ -4,8 +4,8 @@ import pygame
 
 import painter
 
-class Weapon(pygame.sprite.Sprite):
-  def __init__(self, cX, cY, (rate, hp, bulletType, image), game):
+class GameObject(pygame.sprite.Sprite):
+  def __init__(self, cX, cY, hp, image, game):
     """Initializes enemy with its coordinates.
         Args:
         cX: x coordinate.
@@ -14,18 +14,49 @@ class Weapon(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)
     self.cX = cX
     self.cY = cY
-    self.bulletType = bulletType
-    self.hp = hp
-    self.rate = rate
     self.image = image
-    self.game = game
+    self.hp = hp
     
     self.rect = image.get_rect()
     self.rect.move_ip((cX, cY))
     self.width = image.get_size()[0]
+    self.game = game
+
+
+class Enemy(GameObject):
+  def __init__(self, cX, cY, (speed, hp, damage, image), game):
+    GameObject.__init__(self, cX, cY, hp, image, game)
+    self.speed = speed
+    self.damage = damage
+
+  def update(self):
+    """move object to the right to self.speed pixels
+    """
+    if self.hp <= 0:
+      self.game.enemies.remove(self)
+      
+    self.rect = self.rect.move(self.speed, 0)
+    self.cX = self.rect[0]
     
+  def GetDamage(self, damage):
+    self.hp -= damage
+    
+  def Damage(self):
+    return self.damage
+  
+
+
+class Weapon(GameObject):
+  def __init__(self, cX, cY, (rate, hp, bulletType, image), game):
+    """Initializes enemy with its coordinates.
+        Args:
+        cX: x coordinate.
+        cY: y coordinate.
+    """
+    GameObject.__init__(self, cX, cY, hp, image, game)
+    self.bulletType = bulletType
+    self.rate = rate    
     self.tick = 0
-    
 
   def update(self):
     """creates a new bullet with self.rate frequency
@@ -43,19 +74,12 @@ class Weapon(pygame.sprite.Sprite):
   def GetDamage(self, damage):
     self.hp -= damage
 
-class Bullet(pygame.sprite.Sprite):
+
+class Bullet(GameObject):
   def __init__(self, cX, cY, (speed, damage, image), game):
-    pygame.sprite.Sprite.__init__(self)
-    self.cX = cX
-    self.cY = cY
-    self.damage = damage
+    GameObject.__init__(self, cX, cY, hp=0, image=image, game=game)
     self.speed = speed
-    self.image = image
-    self.game = game
-    
-    self.rect = image.get_rect()
-    self.rect.move_ip((cX, cY))
-    self.width = image.get_size()[0]
+    self.damage = damage
     
   def update(self):
     if self.cX <= 0:

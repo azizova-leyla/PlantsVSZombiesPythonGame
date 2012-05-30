@@ -1,13 +1,12 @@
-#!/usr/bin/python2
+#!/usr/bin/python2.7
 
 import sys
 
 import pygame
 from pygame import locals
 
-import enemy
+import game_objects
 import painter
-import weapon
 
 DEFAULT_GAME_SPEED = 4 #ticks per second
 HTAB_SIZE = 0.2 #in percents
@@ -21,11 +20,11 @@ class Game():
     window = pygame.display.set_mode((1000, 550))
     pygame.display.set_caption('The Game')
     
-    self.enemies = AllEnemies()
-    self.weapons = AllWeapons()
-    self.bullets = AllBullets()
+    self.enemies = pygame.sprite.RenderUpdates()
+    self.weapons = pygame.sprite.RenderUpdates()
+    self.bullets = pygame.sprite.RenderUpdates()
     
-    self.speed = float(speed)
+    self.speed = speed
     
     self.width, self.height = pygame.display.get_surface().get_size()
     self.endLocation = self.width
@@ -56,34 +55,31 @@ class Game():
   def KeyboardInput(self, events):
     for event in events:
       if ((event.type == locals.QUIT) or 
-      (event.type == locals.KEYDOWN and event.key == locals.K_ESCAPE)):
+          (event.type == locals.KEYDOWN and event.key == locals.K_ESCAPE)):
         return False
     return True
 
   def IsGameOver(self):
-    """checks if at least one of the enemies touches endLocation 
-      Args:
-        list creatures - list of game objects
-        int endLocation - x coordinate of position where game overs 
+    """Checks if at least one of the enemies touches endLocation.
+
       Returns:
         True if the game is over
     """
     return any(c.cX + c.width >= self.endLocation for c in self.enemies)
 
   def TrySpawnEnemy(self):
-    """creates new Enemy, according to time plan
+    """Creates new Enemy, according to time plan.
+
       Returns:
-        True if Enemy was spawned
-        False if it's not time for the new Enemy
+        Boolean indicating whether an enemy was spawn.
     """
-    if((pygame.time.get_ticks() / self.clock.get_time()) % 
-        ENEMY_SPAWN_FREQUENCY == 0):
+    if ((pygame.time.get_ticks() / self.clock.get_time()) % 
+         ENEMY_SPAWN_FREQUENCY == 0):
       lineNumber = 0 #here may be some random if there is more than one line
       type = 0 #here may be random also
-      newEnemy = enemy.Enemy(
-                     0,
-                     self.fieldTop + lineNumber * VTAB_SIZE * self.height,
-                     self.enemyType[type], self)
+      newEnemy = game_objects.Enemy(
+          0, self.fieldTop + lineNumber * VTAB_SIZE * self.height,
+          self.enemyType[type], self)
       self.enemies.add(newEnemy)
       return True
     return False
@@ -91,21 +87,19 @@ class Game():
   def CreateWeapon(self, lineNumber, weaponType):
     cX = int(self.width * (1 - HTAB_SIZE))
     cY = self.fieldTop + lineNumber * VTAB_SIZE * self.height
-    newWeapon = weapon.Weapon(cX, cY, self.weaponType[weaponType], self)
+    newWeapon = game_objects.Weapon(cX, cY, self.weaponType[weaponType], self)
     self.weapons.add(newWeapon)
     
   def Intersect(self, x, y):
-    """checks if segments intersect in 1D-space
-    """
+    """Checks if segments intersect in 1D-space."""
     return min(x.cX + x.width, y.cX + y.width) > max(x.cX, y.cX)
     
-  def ProcessDamage(self, damageDealer, damageTaker):
-    """process damage from damageDealer to damageTaker if they intersects
-    """
-    for x in damageDealer:
-      for y in damageTaker:
-       if self.Intersect(x, y) == True:
-        y.GetDamage(x.Damage())
+  def ProcessDamage(self, damage_dealer, damage_taker):
+    """Process damage from damage_dealer to damage_taker if they intersects."""
+    for x in damage_dealer:
+      for y in damage_taker:
+        if self.Intersect(x, y):
+          y.GetDamage(x.Damage())
   
   def UpdateAll(self):
     self.TrySpawnEnemy()
@@ -123,39 +117,18 @@ class Game():
     pygame.display.flip()
     
   def ProcessGame(self):
-    """The main loop of the game
-        Args:
-          float speed - amount of ticks in one second 
-          int endLocation - x coordinate of position where game overs 
-    """
-    
+    """The main loop of the game."""
+
     self.CreateWeapon(0, 0)
-    while 1:
+    while self.KeyboardInput(pygame.event.get()):
       self.clock.tick(self.speed)
       
-      if(self.KeyboardInput(pygame.event.get()) == False):
-        return
-       
-      if self.IsGameOver() == True:
+      if self.IsGameOver():
         painter.DisplayGameOver()
       else:
         self.UpdateAll()
         self.DrawAll()
 
-
-class AllEnemies(pygame.sprite.RenderUpdates):
-  def __init__(self):
-    pygame.sprite.RenderUpdates.__init__(self)
-
-
-class AllWeapons(pygame.sprite.RenderUpdates):
-  def __init__(self):
-    pygame.sprite.RenderUpdates.__init__(self)
-
-class AllBullets(pygame.sprite.RenderUpdates):
-  def __init__(self):
-    pygame.sprite.RenderUpdates.__init__(self)
-    
 
 def main():
   speed = DEFAULT_GAME_SPEED
@@ -165,4 +138,5 @@ def main():
   game.ProcessGame()
 
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+  main()
