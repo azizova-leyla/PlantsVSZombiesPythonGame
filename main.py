@@ -34,23 +34,25 @@ class Game():
     #Enemies types properties
     #Defines speed, hp, damage and image
     
-    self.enemyType = []
-    self.enemyType.append((10, 10, 10, painter.LoadImageAndScale("Zombie.jpg",
-                                 (int(self.width * HTAB_SIZE),
-                                 int(self.height * VTAB_SIZE)))))
-    #Weapons types properties
-    #Defines rate, hp, bulletType and image
-    
-    self.weaponType = []
-    self.weaponType.append((10, 10, 0, painter.LoadImageAndScale("W1.jpg",
-                                 (int(self.width * HTAB_SIZE),
-                                 int(self.height * VTAB_SIZE)))))
+    self.enemyType = [(10, 10, 10, 
+                       painter.LoadImageAndScale("Zombie.jpg",
+                                                 (self.width * HTAB_SIZE,
+                                                  self.height * VTAB_SIZE)))]
     #Bullets types properties
     #Defines speed, damage and image
     
-    self.bulletType = []
-    self.bulletType.append((20, 5, painter.LoadImageAndScale("B1.jpg",
-                                 (BULLET_SIZE, BULLET_SIZE))))
+    self.bulletType = [(20, 5,
+                        painter.LoadImageAndScale("B1.jpg",
+                                                  (BULLET_SIZE, BULLET_SIZE)))]
+    
+    #Weapons types properties
+    #Defines rate, hp, bulletType and image
+    
+    self.weaponType = [(10, 10,
+                        self.bulletType[0],
+                        painter.LoadImageAndScale("W1.jpg",
+                                                  (self.width * HTAB_SIZE,
+                                                   self.height * VTAB_SIZE)))]
 
   def KeyboardInput(self, events):
     for event in events:
@@ -79,7 +81,7 @@ class Game():
       type = 0 #here may be random also
       newEnemy = game_objects.Enemy(
           0, self.fieldTop + lineNumber * VTAB_SIZE * self.height,
-          self.enemyType[type], self)
+          self.enemyType[type])
       self.enemies.add(newEnemy)
       return True
     return False
@@ -87,7 +89,7 @@ class Game():
   def CreateWeapon(self, lineNumber, weaponType):
     cX = int(self.width * (1 - HTAB_SIZE))
     cY = self.fieldTop + lineNumber * VTAB_SIZE * self.height
-    newWeapon = game_objects.Weapon(cX, cY, self.weaponType[weaponType], self)
+    newWeapon = game_objects.Weapon(cX, cY, self.weaponType[weaponType], self.bullets)
     self.weapons.add(newWeapon)
     
   def Intersect(self, x, y):
@@ -105,6 +107,12 @@ class Game():
     self.TrySpawnEnemy()
     self.ProcessDamage(self.bullets, self.enemies)
     self.ProcessDamage(self.enemies, self.weapons)
+    
+    for group in [self.enemies, self.weapons, self.bullets]:
+      for element in group:
+        if not element.IsAlive():
+          group.remove(element)
+    
     self.enemies.update()
     self.weapons.update()
     self.bullets.update()

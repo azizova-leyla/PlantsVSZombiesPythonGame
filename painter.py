@@ -21,8 +21,9 @@ def LoadImageAndScale(name, (w, h)):
     print "Cannot load image:", name
     raise SystemExit, message
   image = image.convert()
-  image = pygame.transform.scale(image, (w, h))
+  image = pygame.transform.scale(image, (int(w), int(h)))
   return image
+
 
 def DrawBackground():
   screen = pygame.display.get_surface()
@@ -35,6 +36,7 @@ def DrawBackground():
   screen.blit(back, (0, screenHeight / 3)) 
   pygame.display.flip() 
   return back
+
   
 def DisplayGameOver():
   screen = pygame.display.get_surface() 
