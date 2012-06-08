@@ -7,6 +7,7 @@ from pygame import locals
 
 import game_objects
 import painter
+import util
 
 DEFAULT_GAME_SPEED = 4 #ticks per second
 HTAB_SIZE = 0.2 #in percents
@@ -49,7 +50,6 @@ class Game():
     #Defines rate, hp, bulletType and image
     
     self.weaponType = [(10, 10,
-                        self.bulletType[0],
                         painter.LoadImageAndScale("W1.jpg",
                                                   (self.width * HTAB_SIZE,
                                                    self.height * VTAB_SIZE)))]
@@ -86,27 +86,22 @@ class Game():
       return True
     return False
     
-  def CreateWeapon(self, lineNumber, weaponType):
+  def CreateWeapon(self, line_number, weapon_type, bullet_type):
     cX = int(self.width * (1 - HTAB_SIZE))
-    cY = self.fieldTop + lineNumber * VTAB_SIZE * self.height
-    newWeapon = game_objects.Weapon(cX, cY, self.weaponType[weaponType], self.bullets)
+    cY = self.fieldTop + line_number * VTAB_SIZE * self.height
+
+    def AddBullet(cX, cY):
+      newBullet = game_objects.Bullet(cX, cY, bullet_type)
+      self.bullets.add(newBullet)
+
+    newWeapon = game_objects.Weapon(cX, cY, self.weaponType[weapon_type],
+                                    AddBullet)
     self.weapons.add(newWeapon)
-    
-  def Intersect(self, x, y):
-    """Checks if segments intersect in 1D-space."""
-    return min(x.cX + x.width, y.cX + y.width) > max(x.cX, y.cX)
-    
-  def ProcessDamage(self, damage_dealer, damage_taker):
-    """Process damage from damage_dealer to damage_taker if they intersects."""
-    for x in damage_dealer:
-      for y in damage_taker:
-        if self.Intersect(x, y):
-          y.GetDamage(x.Damage())
   
   def UpdateAll(self):
     self.TrySpawnEnemy()
-    self.ProcessDamage(self.bullets, self.enemies)
-    self.ProcessDamage(self.enemies, self.weapons)
+    util.ProcessDamage(self.bullets, self.enemies)
+    util.ProcessDamage(self.enemies, self.weapons)
     
     for group in [self.enemies, self.weapons, self.bullets]:
       for element in group:
@@ -123,11 +118,11 @@ class Game():
     self.weapons.draw(pygame.display.get_surface())
     self.bullets.draw(pygame.display.get_surface())
     pygame.display.flip()
-    
+
   def ProcessGame(self):
     """The main loop of the game."""
 
-    self.CreateWeapon(0, 0)
+    self.CreateWeapon(0, 0, self.bulletType[0])
     while self.KeyboardInput(pygame.event.get()):
       self.clock.tick(self.speed)
       

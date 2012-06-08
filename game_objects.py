@@ -17,9 +17,13 @@ class GameObject(pygame.sprite.Sprite):
     self.image = image
     self.hp = hp
     
-    self.rect = image.get_rect()
+    if image:
+      self.rect = image.get_rect()
+      self.width = image.get_size()[0]
+    else:
+      self.rect = pygame.Rect(0, 0, 0, 0)
+      self.width = 0
     self.rect.move_ip((cX, cY))
-    self.width = image.get_size()[0]
   
   def IsAlive(self):
     return self.hp > 0
@@ -45,17 +49,16 @@ class Enemy(GameObject):
 
 
 class Weapon(GameObject):
-  def __init__(self, cX, cY, (rate, hp, bulletType, image), bullet_group):
+  def __init__(self, cX, cY, (rate, hp, image), bullet_callback):
     """Initializes enemy with its coordinates.
         Args:
         cX: x coordinate.
         cY: y coordinate.
     """
     GameObject.__init__(self, cX, cY, hp, image)
-    self.bulletType = bulletType
     self.rate = rate
     self.tick = 0
-    self.bullet_group = bullet_group
+    self.bullet_callback = bullet_callback
 
   def update(self):
     """creates a new bullet with self.rate frequency
@@ -63,8 +66,7 @@ class Weapon(GameObject):
     """
     self.tick += 1
     if self.tick % self.rate == 0:
-      newBullet = Bullet(self.cX, self.cY, self.bulletType)
-      self.bullet_group.add(newBullet)
+      self.bullet_callback(self.cX, self.cY)
       self.tick = 0
       
   def GetDamage(self, damage):
