@@ -22,7 +22,7 @@ class TestSequenceFunctions(unittest.TestCase):
       self.assertEqual(cX, x)
       self.assertEqual(cY, y)
 
-    weapon = game_objects.Weapon(x, y, (rate, weapon_hp, image),
+    weapon = game_objects.Weapon(x, y, rate, weapon_hp, image,
                                  BulletCallback)
     # As far as the rate equals 3,
     # the callback is expected to be called on 3rd step
@@ -41,10 +41,10 @@ class TestSequenceFunctions(unittest.TestCase):
     enemy_damage = 0
 
     enemy = game_objects.Enemy(0, 0,
-                               (enemy_speed, enemy_hp, enemy_damage, None))
+                               enemy_speed, enemy_hp, enemy_damage, None)
     bullet_speed = 5
     bullet_damage = 50
-    bullet = game_objects.Bullet(10, 0, (bullet_speed, bullet_damage, None))
+    bullet = game_objects.Bullet(10, 0, bullet_speed, bullet_damage, None)
 
     enemy.update()
     bullet.update()

@@ -15,6 +15,7 @@ VTAB_SIZE = 0.25 #in percents
 ENEMY_SPAWN_FREQUENCY = 20 #in ticks
 BULLET_SIZE = 20
 
+
 class Game():
   def __init__(self, speed):
     pygame.init()
@@ -24,35 +25,37 @@ class Game():
     self.enemies = pygame.sprite.RenderUpdates()
     self.weapons = pygame.sprite.RenderUpdates()
     self.bullets = pygame.sprite.RenderUpdates()
-    
+
     self.speed = speed
-    
+
     self.width, self.height = pygame.display.get_surface().get_size()
     self.endLocation = self.width
     self.clock = pygame.time.Clock()
     self.fieldTop = self.height / 3
-    
-    #Enemies types properties
-    #Defines speed, hp, damage and image
-    
-    self.enemyType = [(10, 10, 10, 
-                       painter.LoadImageAndScale("Zombie.jpg",
-                                                 (self.width * HTAB_SIZE,
-                                                  self.height * VTAB_SIZE)))]
-    #Bullets types properties
-    #Defines speed, damage and image
-    
-    self.bulletType = [(20, 5,
-                        painter.LoadImageAndScale("B1.jpg",
-                                                  (BULLET_SIZE, BULLET_SIZE)))]
-    
-    #Weapons types properties
-    #Defines rate, hp, bulletType and image
-    
-    self.weaponType = [(10, 10,
-                        painter.LoadImageAndScale("W1.jpg",
-                                                  (self.width * HTAB_SIZE,
-                                                   self.height * VTAB_SIZE)))]
+
+  def MakeZombie(self, cX, cY):
+    return game_objects.Enemy(
+        cX, cY, speed=10, hp=10, damage=10,
+        image=painter.LoadImageAndScale("Zombie.jpg",
+                                        (self.width * HTAB_SIZE,
+                                         self.height * VTAB_SIZE)))
+
+  def MakeSunFlowerWeapon(self, cX, cY):
+    def AddBullet(cX, cY):
+      new_bullet = game_objects.Bullet(
+          cX, cY, speed=20, damage=5,
+          image=painter.LoadImageAndScale("B1.jpg", (BULLET_SIZE,
+                                                     BULLET_SIZE)))
+      self.bullets.add(new_bullet)
+
+    new_weapon = game_objects.Weapon(
+        cX, cY,
+        rate=10, hp=10,
+        image=painter.LoadImageAndScale("W1.jpg",
+                                        (self.width * HTAB_SIZE,
+                                         self.height * VTAB_SIZE)),
+        bullet_callback=AddBullet)
+    return new_weapon
 
   def KeyboardInput(self, events):
     for event in events:
@@ -79,24 +82,18 @@ class Game():
          ENEMY_SPAWN_FREQUENCY == 0):
       lineNumber = 0 #here may be some random if there is more than one line
       type = 0 #here may be random also
-      newEnemy = game_objects.Enemy(
-          0, self.fieldTop + lineNumber * VTAB_SIZE * self.height,
-          self.enemyType[type])
+      newEnemy = self.MakeZombie(0, self.fieldTop + 
+                                 lineNumber * VTAB_SIZE * self.height)
       self.enemies.add(newEnemy)
       return True
     return False
     
-  def CreateWeapon(self, line_number, weapon_type, bullet_type):
+  def CreateWeapon(self, line_number, weapon_type):
     cX = int(self.width * (1 - HTAB_SIZE))
     cY = self.fieldTop + line_number * VTAB_SIZE * self.height
 
-    def AddBullet(cX, cY):
-      newBullet = game_objects.Bullet(cX, cY, bullet_type)
-      self.bullets.add(newBullet)
-
-    newWeapon = game_objects.Weapon(cX, cY, self.weaponType[weapon_type],
-                                    AddBullet)
-    self.weapons.add(newWeapon)
+    weapon = weapon_type(cX, cY)
+    self.weapons.add(weapon)
   
   def UpdateAll(self):
     self.TrySpawnEnemy()
@@ -122,7 +119,7 @@ class Game():
   def ProcessGame(self):
     """The main loop of the game."""
 
-    self.CreateWeapon(0, 0, self.bulletType[0])
+    self.CreateWeapon(line_number=0, weapon_type=self.MakeSunFlowerWeapon)
     while self.KeyboardInput(pygame.event.get()):
       self.clock.tick(self.speed)
       

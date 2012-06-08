@@ -30,7 +30,7 @@ class GameObject(pygame.sprite.Sprite):
 
 
 class Enemy(GameObject):
-  def __init__(self, cX, cY, (speed, hp, damage, image)):
+  def __init__(self, cX, cY, speed, hp, damage, image):
     GameObject.__init__(self, cX, cY, hp, image)
     self.speed = speed
     self.damage = damage
@@ -49,7 +49,7 @@ class Enemy(GameObject):
 
 
 class Weapon(GameObject):
-  def __init__(self, cX, cY, (rate, hp, image), bullet_callback):
+  def __init__(self, cX, cY, rate, hp, image, bullet_callback):
     """Initializes enemy with its coordinates.
         Args:
         cX: x coordinate.
@@ -74,7 +74,7 @@ class Weapon(GameObject):
 
 
 class Bullet(GameObject):
-  def __init__(self, cX, cY, (speed, damage, image)):
+  def __init__(self, cX, cY, speed, damage, image):
     GameObject.__init__(self, cX, cY, hp=damage, image=image)
     self.speed = speed
     
