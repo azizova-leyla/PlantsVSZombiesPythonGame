@@ -62,6 +62,18 @@ class TestSequenceFunctions(unittest.TestCase):
   def test_intersect(self):
     MyObject = collections.namedtuple('MyObject', ['cX', 'width'])
     self.assertTrue(util.Intersect(MyObject(0, 0), MyObject(0, 0)))
+    
+  def test_inside(self):
+    point = (1, 1)
+    polygon_left_down_corner = (-1, -1)
+    polygon_size = (2, 2)
+    self.assertTrue(util.Inside(point, polygon_left_down_corner, polygon_size))
+  
+  def test_not_inside(self):
+    point = (-10, 10)
+    polygon_left_down_corner = (-1, -1)
+    polygon_size = (2, 2)
+    self.assertFalse(util.Inside(point, polygon_left_down_corner, polygon_size))
 
 
 if __name__ == '__main__':

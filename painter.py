@@ -27,25 +27,24 @@ def LoadImageAndScale(name, (w, h)):
 
 def DrawBackground():
   screen = pygame.display.get_surface()
-  screenWidth, screenHeight = screen.get_size()
+  screen_width, screen_height = screen.get_size()
   background = pygame.Surface(screen.get_size())
   background = background.convert()
   background.fill((0, 0, 0)) 
   screen.blit(background, (0, 0)) 
-  back = LoadImageAndScale("grass.jpg", (screenWidth, screenHeight / 4))
-  screen.blit(back, (0, screenHeight / 3)) 
-  pygame.display.flip() 
-  return back
 
+def DrawLine(pos, img):
+  screen = pygame.display.get_surface()
+  screen.blit(img, pos)
+  
   
 def DisplayGameOver():
-  screen = pygame.display.get_surface() 
-  screenWidth, screenHeight = screen.get_size()
+  screen = pygame.display.get_surface()
+  screen_width, screen_height = screen.get_size()
   background = pygame.Surface(screen.get_size()) 
   background = background.convert()
   background.fill((255, 255, 255)) 
   screen.blit(background, (0, 0)) 
-  back = LoadImageAndScale("gameover.png", (screenWidth, screenHeight / 3))
-  screen.blit(back, (0, screenHeight / 3)) 
-  pygame.display.flip() 
+  back = LoadImageAndScale("gameover.png", (screen_width, screen_height / 3))
+  screen.blit(back, (0, screen_height / 3))
   
