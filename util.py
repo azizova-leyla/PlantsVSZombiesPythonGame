@@ -11,15 +11,17 @@ def ProcessDamage(damage_dealer, damage_taker):
     for y in damage_taker:
       if Intersect(x, y):
         y.GetDamage(x.Damage())
+
         
 def Inside(point, polygon_left_down_corner, polygons_size):
   polygon_up_right_corner = (polygon_left_down_corner[0] + polygons_size[0],
                              polygon_left_down_corner[1] + polygons_size[1])
   return (point[0] >= polygon_left_down_corner[0] and
-           point[1] >= polygon_left_down_corner[1] and
-           point[0] <= polygon_up_right_corner[0] and
-           point[1] <= polygon_up_right_corner[1])
-        
+          point[1] >= polygon_left_down_corner[1] and
+          point[0] <= polygon_up_right_corner[0] and
+          point[1] <= polygon_up_right_corner[1])
+
+
 def InWhatPolygonIsPoint(point, polygons_corner, polygons_size):
   for polygon_left_down_corner in polygons_corner:
     if Inside(point, polygon_left_down_corner, polygons_size):

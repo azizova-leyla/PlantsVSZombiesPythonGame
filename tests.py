@@ -7,7 +7,7 @@ import game_objects
 import util
 
 
-class TestSequenceFunctions(unittest.TestCase):
+class TestGameLogic(unittest.TestCase):
   def setUp(self):
     self.callback_called = False
 

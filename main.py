@@ -16,6 +16,7 @@ ENEMY_SPAWN_FREQUENCY = 20 #in ticks
 START_SCORE = 0
 DEFAULT_SCORE_INC = 10
 
+
 class Game():
   def __init__(self, speed):
     pygame.init()
@@ -41,8 +42,8 @@ class Game():
     self.object_size = (self.width * HTAB_SIZE, self.height * VTAB_SIZE)
     self.bullet_size = (20, 20)
     
-    self.weapons_cost = {}
-    #how to use function as key?
+    self.weapons_directory = {'Sunflower': (10, self.MakeSunFlowerWeapon)}
+    self.current_weapon = self.weapons_directory['Sunflower']
     
   def MakeZombie(self, cX, cY):
     return game_objects.Enemy(
@@ -100,10 +101,13 @@ class Game():
     """Tries to create weapon in coordinates of mouse click"""
 
     line_pos = util.InWhatPolygonIsPoint(point = pos, 
-        polygons_corner = self.line_pos, polygons_size = self.line_size)
+                                         polygons_corner = self.line_pos,
+                                         polygons_size = self.line_size)
     #if line start is inside the screen
-    if util.Inside(line_pos, (0, 0), (self.width, self.height)):
-      self.CreateWeapon((pos[0], line_pos[1]), self.MakeSunFlowerWeapon)
+    if (util.Inside(line_pos, (0, 0), (self.width, self.height)) and
+        self.current_weapon[0] <= self.score):
+      self.score -= self.current_weapon[0]
+      self.CreateWeapon((pos[0], line_pos[1]), self.current_weapon[1])
       
   
   def CreateWeapon(self, (cX, cY), weapon_type):
@@ -145,6 +149,7 @@ class Game():
     #self.CreateWeapon(line_number=0, weapon_type=self.MakeSunFlowerWeapon)
     while self.InputEvents(pygame.event.get()):
       self.clock.tick(self.speed)
+      print 'Current score %d' % self.score
       
       if self.IsGameOver():
         painter.DisplayGameOver()
