@@ -14,7 +14,7 @@ HTAB_SIZE = 0.2 #in percents
 VTAB_SIZE = 0.25 #in percents
 ENEMY_SPAWN_FREQUENCY = 20 #in ticks
 START_SCORE = 0
-DEFAULT_SCORE_INC = 10
+DEFAULT_SCORE_INC = 1
 
 
 class Game():
@@ -42,9 +42,18 @@ class Game():
     self.object_size = (self.width * HTAB_SIZE, self.height * VTAB_SIZE)
     self.bullet_size = (20, 20)
     
-    self.weapons_directory = {'Sunflower': (10, self.MakeSunFlowerWeapon)}
-    self.current_weapon = self.weapons_directory['Sunflower']
-    
+    self.weapons_names = ['Sunflower', 'Daisy']
+
+    self.weapons_directory = {
+        self.weapons_names[0]: (10, self.MakeSunFlowerWeapon),
+        self.weapons_names[1]: (20, self.MakeDaisyWeapon)}
+    self.current_weapon = self.weapons_directory[self.weapons_names[0]]
+    self.weapon_images = {
+        self.weapons_names[0]: "W1.png", 
+        self.weapons_names[1]: "W2.gif"}
+    self.weapon_chooser_images_size = (40, 50)
+    self.weapon_chooser_images_pos = []
+
   def MakeZombie(self, cX, cY):
     return game_objects.Enemy(
         cX, cY, speed=10, hp=10, damage=10,
@@ -56,12 +65,28 @@ class Game():
           cX, cY, speed=20, damage=5,
           image=painter.LoadImageAndScale("B1.jpg", self.bullet_size))
       self.bullets.add(new_bullet)
-
+    
     new_weapon = game_objects.Weapon(
         cX, cY,
         rate=10, hp=10,
-        image=painter.LoadImageAndScale("W1.png", self.object_size),
-                                        bullet_callback=AddBullet)
+        image=painter.LoadImageAndScale(
+            self.weapon_images['Sunflower'], self.object_size),
+            bullet_callback=AddBullet)
+    return new_weapon
+
+  def MakeDaisyWeapon(self, cX, cY):
+    def AddBullet(cX, cY):
+      new_bullet = game_objects.Bullet(
+          cX, cY, speed=10, damage=10,
+          image=painter.LoadImageAndScale("B2.jpg", self.bullet_size))
+      self.bullets.add(new_bullet)
+
+    new_weapon = game_objects.Weapon(
+        cX, cY,
+        rate=30, hp=10,
+        image=painter.LoadImageAndScale(
+            self.weapon_images['Daisy'], self.object_size),
+            bullet_callback=AddBullet)
     return new_weapon
 
   def InputEvents(self, events):
@@ -71,6 +96,7 @@ class Game():
         return False
       if(event.type == locals.MOUSEBUTTONDOWN):
         self.TryCreateWeapon(self, event.pos)
+        self.ChangeCurrentWeapon(self, event.pos)
     return True
 
   def IsGameOver(self):
@@ -80,6 +106,16 @@ class Game():
         True if the game is over
     """
     return any(c.cX + c.width >= self.end_location for c in self.enemies)
+
+  def ChangeCurrentWeapon(self, instance, pos):
+    weapon_type =  util.InWhatPolygonIsPoint(
+        point = pos, 
+        polygons_corner = self.weapon_chooser_images_pos,
+        polygons_size = self.weapon_chooser_images_size)
+    if weapon_type >= 0:
+      new_weapon = self.weapons_names[weapon_type]
+      self.current_weapon = self.weapons_directory[new_weapon]
+
 
   def TrySpawnEnemy(self):
     """Creates new Enemy, according to time plan.
@@ -100,13 +136,14 @@ class Game():
   def TryCreateWeapon(self, instance, pos):
     """Tries to create weapon in coordinates of mouse click"""
 
-    line_pos = util.InWhatPolygonIsPoint(point = pos, 
+    line_num = util.InWhatPolygonIsPoint(point = pos, 
                                          polygons_corner = self.line_pos,
                                          polygons_size = self.line_size)
     #if line start is inside the screen
-    if (util.Inside(line_pos, (0, 0), (self.width, self.height)) and
+    if (line_num >= 0 and
         self.current_weapon[0] <= self.score):
       self.score -= self.current_weapon[0]
+      line_pos = self.line_pos[line_num]
       self.CreateWeapon((pos[0], line_pos[1]), self.current_weapon[1])
       
   
@@ -135,12 +172,16 @@ class Game():
   def DrawAll(self):
     painter.DrawBackground()
     for pos in self.line_pos:
-      painter.DrawLine(pos,
+      painter.DrawLine(
+          pos,
           img = painter.LoadImageAndScale("grass.jpg", self.line_size))
           
     self.enemies.draw(pygame.display.get_surface())
     self.weapons.draw(pygame.display.get_surface())
     self.bullets.draw(pygame.display.get_surface())
+    self.weapon_chooser_images_pos = painter.DrawWeaponChooser(
+        self.weapon_images, self.weapon_chooser_images_size)
+    painter.DrawScore(self.score)
     pygame.display.flip()
 
   def ProcessGame(self):
@@ -149,7 +190,6 @@ class Game():
     #self.CreateWeapon(line_number=0, weapon_type=self.MakeSunFlowerWeapon)
     while self.InputEvents(pygame.event.get()):
       self.clock.tick(self.speed)
-      print 'Current score %d' % self.score
       
       if self.IsGameOver():
         painter.DisplayGameOver()

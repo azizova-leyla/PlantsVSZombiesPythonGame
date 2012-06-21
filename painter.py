@@ -4,7 +4,7 @@ import os
 import sys
 
 import pygame
-
+import pygame.font
 
 def LoadImageAndScale(name, (w, h)):
   """ 
@@ -37,7 +37,28 @@ def DrawLine(pos, img):
   screen = pygame.display.get_surface()
   screen.blit(img, pos)
   
-  
+def DrawScore(value):
+  screen = pygame.display.get_surface()
+  font = pygame.font.Font(None, 50)
+  screen_width, screen_height = screen.get_size()
+  pos = (screen_width - 50, 0)
+  text = font.render(str(value), 1, (0, 80, 10))
+  screen.blit(text, pos)
+
+def DrawWeaponChooser(images, img_size):
+  screen = pygame.display.get_surface()
+  screen_width, screen_height = screen.get_size()
+  images_pos = []
+  pos = (0, 0)
+  for name in images.keys():
+    img = LoadImageAndScale(images[name], img_size)
+    screen.blit(img, pos)
+    images_pos.append(pos)
+    pos = (pos[0] + img_size[0] + 5, pos[1])
+    if(pos[0] >= screen_width):
+      pos = (0, pos[1] + img_size[1]) 
+  return images_pos
+
 def DisplayGameOver():
   screen = pygame.display.get_surface()
   screen_width, screen_height = screen.get_size()

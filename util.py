@@ -23,7 +23,9 @@ def Inside(point, polygon_left_down_corner, polygons_size):
 
 
 def InWhatPolygonIsPoint(point, polygons_corner, polygons_size):
+  i = 0
   for polygon_left_down_corner in polygons_corner:
     if Inside(point, polygon_left_down_corner, polygons_size):
-      return polygon_left_down_corner
-  return (-1, -1)
+      return i
+    i = i + 1
+  return -1
